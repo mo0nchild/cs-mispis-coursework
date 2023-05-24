@@ -1,0 +1,19 @@
+﻿@page "/manager/workers"
+@model WebApplication.Pages.ManagerPages.ManagerWorkersModel
+@{
+    this.ViewData["Title"] = "Штат сотрудников";
+}
+@section Supports { @{ await this.Html.RenderPartialAsync("ManagerTabsPartial"); } }
+
+<div class="container p-0 my-5">
+    <div class="row justify-content-center">
+        @if(this.Model.ErrorMessage != null)
+        {
+        <div class="mb-4 alert alert-danger alert-dismissible fade show" role="alert" style="border-radius:16px;">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <strong>Уведомление!</strong>&nbsp;@this.Model.ErrorMessage
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        }
+    </div>
+</div>

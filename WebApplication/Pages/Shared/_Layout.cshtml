@@ -1,0 +1,66 @@
+﻿﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@this.ViewData["Title"]</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <base href="~/"/> 
+    @await RenderSectionAsync("Style", required: false)
+</head>
+<body>
+    <nav class="navbar navbar-expand-md fixed-top 
+        shadow py-2 bg-body-tertiary" style="background-color:var(--main-color);">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand p-0 d-inline-flex text-light" href="#">
+               
+                <img src="/icons/logo.svg" alt="Logo" width="48" height="48" class="me-1 d-inline-block align-text-top"/>
+                <span class="align-self-center fs-5 text-decoration-none" style="color:var(--main-text-color);font-weight:600;text-decoration:underline">
+                    Оконное предприятие
+                </span>
+            </a>
+            <button class="navbar-toggler border border-2 border-danger" type="button" style="outline:none;box-shadow:none;" 
+                data-bs-toggle="collapse" data-bs-target="#navbar-dropdown" >
+                <span class="text-danger fs-2 bi bi-list"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-end px-2" id="navbar-dropdown">
+                @await RenderSectionAsync("Supports", required: false)
+            </div>
+        </div>
+    </nav>
+    <div class="container mt-5" style="flex-grow: 1;">
+        <main role="main" class="mb-3 mb-sm-3 h-100"> @RenderBody() </main>
+    </div>
+    <footer class="text-center text-white mt-sm-2 mt-2" id="page-footer">
+        <div class="container p-4 pb-0">
+            <section class="mb-4">
+                <a class="btn btn-outline-light btn-floating m-1 border-secondary" href="#!" role="button">
+                    <i class="fs-5 bi bi-telegram text-secondary"></i>
+                </a>
+                <a class="btn btn-outline-light btn-floating m-1 border-secondary" href="#!" role="button">
+                    <i class="fs-5 bi bi-youtube text-secondary"></i>
+                </a>
+                <a class="btn btn-outline-light btn-floating m-1 border-secondary" href="#!" role="button">
+                    <i class="fs-5 bi bi-facebook text-secondary"></i>
+                </a>
+                <a class="btn btn-outline-light btn-floating m-1 border-secondary" href="#!" role="button">
+                    <i class="fs-5 bi bi-discord text-secondary"></i>
+                </a>
+                <a class="btn btn-outline-light btn-floating m-1 border-secondary" href="https://github.com/mo0nchild" role="button">
+                    <i class="fs-5 bi bi-github text-secondary"></i>
+                </a>
+            </section>
+        </div>
+        <div class="text-center fs-6 p-3" style="background-color:var(--secondary-color);color:var(--main-text-color);">
+            © 2023 Copyright:
+            <a href="#!" style="color:var(--main-text-color);">1С:Окна.com</a>
+        </div>
+    </footer>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

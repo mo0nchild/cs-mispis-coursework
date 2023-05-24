@@ -1,0 +1,94 @@
+﻿@page "/client"
+@model WebApplication.Pages.ClientPage
+@{
+    this.ViewData["Title"] = "Просмотр заказов";
+    var windowTypes = new SelectList(new string[] { "Бюджетный", "Стандарт", "Премиум" });
+}
+@section Supports { @{ await this.Html.RenderPartialAsync("ClientTabsPartial"); } }
+
+<div class="container p-0 my-5">
+    <div class="row justify-content-center">
+        @if(this.Model.ErrorMessage != null)
+        {
+        <div class="mb-4 alert alert-danger alert-dismissible fade show" role="alert" style="border-radius:16px;">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <strong>Уведомление!</strong>&nbsp;@this.Model.ErrorMessage
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        }
+        <div class="col-12 col-sm-10 shadow border border-secondary p-5 mb-4" style="border-radius:16px;">
+
+            <div class="row justify-content-between mb-3">
+                <div class="col-12 col-sm-6 col-md-6">
+                    <label class="form-label fs-4 fw-semibold"> <i class="bi bi-card-checklist"></i>&nbsp; Список созданных заказов: </label>
+                </div>
+               <div class="col-12 col-sm-6 col-md-4">
+                   
+                   <div class="input-group mb-3 flex-nowrap">
+                       <button type="button" class="btn flex-grow-1 btn-secondary" data-bs-toggle="collapse" href="#collapseOrder"
+                            style="overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">
+                            Добавить новый заказ
+                       </button>
+                       <span class="input-group-text"><i class="bi bi-database-fill-add"></i></span>
+                    </div>
+                </div>
+            </div>
+            <div class="collapse" id="collapseOrder">
+                <form class="card card-body mb-3" method="post" asp-page="ClientPage">
+                    <div class="row mb-3">
+                        <div class="col-12 col-sm-6">
+                            <label class="form-label">Тип окна:</label>
+                            @this.Html.DropDownList("Windowtype", windowTypes, new { @class="form-select" })
+                        </div>
+                        <div class="col-12 col-sm-6">
+                            <label class="form-label">Толщина окна:</label>
+                            <div class="input-group mb-3">
+                                <span class="input-group-text">Кол-во пакетов:</span>
+                                <input min="1" max="4" type="number" name="Packetcount" class="form-control" value="1"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-6 col-sm-4">
+                            <label class="form-label">Ширина окна:</label>
+                            <input min="10" max="100" type="number" name="Height" class="form-control" value="50"/>
+                        </div>
+                        <div class="col-6 col-sm-4">
+                            <label class="form-label">Длина окна:</label>
+                            <input min="10" max="100" type="number" name="Width" class="form-control" value="50"/>
+                        </div>
+                        <div class="col-6 col-sm-4">
+                            <label class="form-label">&nbsp;</label>
+                            <input type="submit" class="btn btn-secondary w-100" value="Заказать"/>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            
+            <div style="overflow:scroll;max-height:300px;">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th> <th scope="col">Размеры:</th> <th scope="col">Тип окна:</th>
+                        <th scope="col">Толщина:</th> <th scope="col">Состояние:</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (var index = 0; index < this.Model.ClientModel.Orders.Count; index++ )
+                    {
+                    var orderRecord = this.Model.ClientModel.Orders.ElementAt(index);
+                    <tr>
+                        <th scope="row">@(index + 1)</th> <td>@($"{orderRecord.Width} / {orderRecord.Height}")</td>
+                        <td>@orderRecord.Windowtype</td> <td>@($"Кол-во пакетов: {orderRecord.Packetcount}")</td>
+                        <td>@orderRecord.State</td>
+                    </tr> 
+                    }
+                </tbody>
+            </table>
+            </div>
+
+        </div>
+       
+
+    </div>
+</div>

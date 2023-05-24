@@ -1,0 +1,245 @@
+﻿@page "/authorization"
+@model IndexModel
+@{
+    const string underlineClass = "border-bottom border-2 border-danger";
+    this.ViewData["Title"] = "Главная страница";
+
+    var gendersList = new SelectList(new string[] { "Мужчина", "Женщина", "Не указывать" });
+    var transportsList = new SelectList(new string[] { "Легковая машина", "Грузовая машина", "Велосипед", "Мотоцикл", "Самокат" });
+}
+@section Supports {
+<ul class="navbar-nav my-3 my-sm-0 my-lg-0 navbar-nav-scroll" 
+    style="--bs-scroll-height:84px;font-size:14pt;"> 
+    <li class="nav-item">
+        <div class="dropdown nav-link text-danger p-1 @((this.Model.IndexMode != IndexMode.Authorization ? underlineClass : ""))">
+            <a class="text-danger text-decoration-none dropdown-toggle" role="button" data-bs-toggle="dropdown">
+                Регистрация
+            </a>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" asp-page="Index" asp-route-IndexMode="@IndexMode.Client">Клиент</a></li>
+                <li><a class="dropdown-item" asp-page="Index" asp-route-IndexMode="@IndexMode.Manager">Менеджер</a></li>
+                <li><a class="dropdown-item" asp-page="Index" asp-route-IndexMode="@IndexMode.Builder">Сборщик</a></li>
+                <li><a class="dropdown-item" asp-page="Index" asp-route-IndexMode="@IndexMode.Provider">Поставщик</a></li>
+                <li><a class="dropdown-item" asp-page="Index" asp-route-IndexMode="@IndexMode.Delivery">Доставщик</a></li>
+            </ul>
+        </div>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link text-danger p-1 @((this.Model.IndexMode == IndexMode.Authorization ? underlineClass : ""))" 
+            asp-page="Index" asp-route-IndexMode="@IndexMode.Authorization">Авторизация</a>
+    </li>
+</ul>
+}
+@section Scripts {
+<script id="password-hideshow" type="text/javascript">
+    $(this.document).ready(function() {
+        var changeClass = (added, deleted) => {
+            $('#password-icon').addClass(added); $('#password-icon').removeClass(deleted);
+        };
+        var isPasswordHide = false;
+        $('#button-addon').click(function(){
+            if(isPasswordHide == false) {
+                $('#password').attr('type', 'text'); changeClass('bi-eye-fill', 'bi-eye-slash-fill');
+            }
+            else { $('#password').attr('type', 'password'); changeClass('bi-eye-slash-fill', 'bi-eye-fill'); }
+            isPasswordHide = !isPasswordHide;
+        });
+    });
+</script>
+}
+
+<div class="container p-0 my-5">
+    <div class="row justify-content-center">
+    @if(this.Model.HasError == true)
+    {
+    <div class="mb-4 alert alert-danger alert-dismissible fade show" role="alert" style="border-radius:16px;">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        <strong>Уведомление!</strong>&nbsp;@this.Model.ErrorMessage
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    }
+    @if (this.Model.IndexMode == IndexMode.Authorization)
+    {
+        <div class="col-12 col-sm-6 shadow border border-secondary p-5" style="border-radius:10px;">
+            <form asp-page="Index" asp-page-handler="Login" method="post" asp-antiforgery="true">
+
+                <input type="hidden" asp-for="IndexMode" value="@this.Model.IndexMode" />
+
+            <label class="form-label mb-4 fs-5 fw-semibold"> Данные для входа в профиль: </label>
+            <div class="input-group mb-3 has-validation">
+                <span class="input-group-text" id="basic-addon">@@</span>
+                <div class="form-floating flex-grow-1 mx-0">
+                    @this.Html.TextBox("AuthorizationModel.Login", "", new {@class=$"form-control {(this.Model.HasError ? "is-invalid" : "")}", 
+                        placeholder="Логин/Email", maxlength="50"})
+                    <label for="login">Логин/Email</label>
+                </div>
+            </div>
+            <div class="input-group mb-2 has-validation">
+                <div class="form-floating flex-grow-1 @(this.Model.HasError ? "is-invalid" : "")">
+                    @this.Html.TextBox("AuthorizationModel.Password", "", new {@class=$"form-control {(this.Model.HasError ? "is-invalid" : "")}", 
+                        type="password", placeholder="Пароль", maxlength="50"})
+                    <label for="password">Пароль</label>
+                </div>
+                <button class="btn btn-outline-secondary" type="button" id="button-addon">
+                    <i id="password-icon" class="bi bi-eye-slash-fill"></i>
+                </button>
+            </div>
+            <div id="passwordHelpBlock" class="form-text mb-4">
+                Использовать логин или электронную почту для входа в профиль
+            </div>
+            <div class="form-text mb-2 text-danger">
+                &nbsp @if(this.Model.HasError) { <text>@(this.Model.ErrorMessage ?? "Неверные данные")</text> } 
+            </div>
+            <div class="d-flex justify-content-center mx-auto mb-3">
+                <input class="btn btn-secondary w-100 fs-5" type="submit" value="Войти"/>
+            </div>
+
+            </form>
+        </div>
+    }
+    else {
+        <div class="col-12 col-sm-8 shadow border border-secondary p-5" style="border-radius:10px;">
+            <label class="form-label mb-4 fs-5 fw-semibold"> Регистрация нового пользователя: </label>
+            <form asp-page="Index" asp-antiforgery="true" method="post" asp-page-handler="Registration">
+                <input type="hidden" asp-for="IndexMode" value="@this.Model.IndexMode" />
+                <div class="row mb-3">
+                    <div class="col-12 col-sm-6">
+                        <label class="form-label">Логин:</label>
+                        <div class="input-group has-validation">
+                            <span class="input-group-text"><i class="bi bi-person-circle"></i></span>
+                            <input class="form-control" type="text" asp-for="AuthorizationModel.Login" maxlength="50" placeholder="Укажите логин"/>
+                        </div>
+                        <div class="form-text">Диапазон вводимых символов от 5 до 50 знаков</div>
+                    </div>
+                    <div class="col-12 col-sm-6">
+                        <label class="form-label">Пароль:</label>
+                        <div class="input-group has-validation">
+                            <input id="password" class="form-control" type="password" asp-for="AuthorizationModel.Password" maxlength="50" placeholder="Укажите пароль"/>
+                            <button class="btn btn-outline-secondary" type="button" id="button-addon">
+                                <i id="password-icon" class="bi bi-eye-slash-fill"></i>
+                            </button>
+                        </div>
+                        <div class="form-text">Диапазон вводимых символов от 5 до 50 знаков</div>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-12 col-sm-4">
+                        <label class="form-label">Фамилия:</label>
+                        <input class="form-control" type="text" asp-for="AccountModel.Surname" maxlength="50" placeholder="Укажите вашу фамилию"/>
+                    </div>
+                    <div class="col-12 col-sm-4">
+                        <label class="form-label">Имя:</label>
+                        <input class="form-control" type="text" asp-for="AccountModel.Name" maxlength="50" placeholder="Укажите ваше имя"/>
+                    </div>
+                    <div class="col-12 col-sm-4">
+                        <label class="form-label">Отчество:</label>
+                        <input class="form-control" type="text" asp-for="AccountModel.Patronymic" maxlength="50" placeholder="(Необязательно)"/>
+                    </div>
+                    <div class="form-text">Диапазон вводимых символов от 5 до 50 знаков</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-12 col-sm-4">
+                        <label class="form-label">Адрес проживания:</label>
+                        <div class="input-group has-validation">
+                            <span class="input-group-text"><i class="bi bi-mailbox2"></i></span>
+                            <input class="form-control" type="text" asp-for="AccountModel.Address" maxlength="50" placeholder="Ваше местожительство"/>
+                        </div>
+                        <div class="form-text">Диапазон вводимых символов от 5 до 50 знаков</div>
+                    </div>
+                    <div class="col-12 col-sm-4">
+                        <label class="form-label">Телефон:</label>
+                        <div class="input-group has-validation">
+                            <span class="input-group-text"><i class="bi bi-telephone-forward"></i></span>
+                            <input class="form-control" type="text" asp-for="AccountModel.Phonenumber" maxlength="12" placeholder="Пример: +79009009090"/>
+                        </div>
+                        <div class="form-text">Количество вводимых символов 12 знаков</div>
+                    </div>
+                    <div class="col-12 col-sm-4">
+                        <label class="form-label">День рождения:</label>
+                        <input class="form-control" type="date" asp-for="AccountModel.Birthday"/>
+                    </div> 
+                </div>
+        @switch(this.Model.IndexMode) {
+            case IndexMode.Client:
+            
+                <label class="form-label mb-4 fs-5 fw-semibold"> Создание клиента: </label>
+                <div class="row mb-3">
+                    <label class="form-label">Email почта:</label>
+                    <div class="input-group has-validation">
+                        <span class="input-group-text"><i class="bi bi-at"></i></span>
+                        <input class="form-control" type="text" asp-for="ClientModel.Emailaddress" maxlength="50" placeholder="Пример: test@gmail.com"/>
+                    </div>
+                    <div class="form-text">Диапазон вводимых символов от 10 до 50 знаков</div>
+                </div>
+
+            break;
+            case IndexMode.Builder:
+                <label class="form-label mb-4 fs-5 fw-semibold"> Создание сборщика: </label>    
+                
+                await this.RenderEmployeeForm(gendersList);
+            break;
+            case IndexMode.Manager:
+                <label class="form-label mb-4 fs-5 fw-semibold"> Создание менеджера: </label>
+                await this.RenderEmployeeForm(gendersList);
+            break;
+            case IndexMode.Provider:
+                <label class="form-label mb-4 fs-5 fw-semibold"> Создание поставщика: </label>
+                <div class="row mb-3">
+                    <div class="col-12 col-sm-6">
+                        <label class="form-label">Название компании:</label>
+                        <input class="form-control" type="text" asp-for="ProviderModel.Companyname" maxlength="50" placeholder="Введите название"/>
+                    </div>
+                    <div class="col-12 col-sm-6">
+                        <label class="form-label">Адрес офиса:</label>
+                        <input class="form-control" type="text" asp-for="ProviderModel.Address" maxlength="50" placeholder="Введите адрес"/>
+                    </div>
+                </div>
+            break;
+            case IndexMode.Delivery:
+                <label class="form-label mb-4 fs-5 fw-semibold"> Создание доставщика: </label>
+                await this.RenderEmployeeForm(gendersList);
+                <div class="row mb-3">
+                    <div class="col-12 col-sm-6">
+                        <label class="form-label">Водительская лицензия:</label>
+                        <input class="form-control" type="text" asp-for="DeliverymanModel.Driverlicence" maxlength="50" placeholder="Введите данные лицензии"/>
+                    </div>
+                    <div class="col-12 col-sm-6">
+                        <label class="form-label">Тип транспорта:</label>
+                        @this.Html.DropDownListFor(item => item.DeliverymanModel.Transporttype, transportsList, new {@class="form-select"})
+                    </div>
+                </div>
+            break;
+        }
+                <input type="submit" class="btn mt-3 w-100 btn-secondary" value="Зарегистрироваться"/>
+            </form>
+        </div>
+    }
+    </div>
+</div>
+@functions {
+    public async Task RenderEmployeeForm(SelectList gendersList)
+    {
+        <div>
+        <div class="row mb-3">
+            <div class="col-12 col-sm-6">
+                <label class="form-label">Паспорт:</label>
+                <input class="form-control" type="text" asp-for="EmployeeModel.Passport" maxlength="11" placeholder="Пример: 0000-000000"/>
+            </div>
+            <div class="col-12 col-sm-6">
+                <label class="form-label">Пол:</label>
+                <div class="input-group has-validation">
+                    <span class="input-group-text"><i class="bi bi-universal-access-circle"></i></span>
+                    @this.Html.DropDownListFor(item => item.EmployeeModel.Gender, gendersList, new {@class="form-select"})
+                </div>
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-12">
+                <label class="form-label">Образование:</label>
+                <input class="form-control" type="text" asp-for="EmployeeModel.Education" maxlength="50" placeholder="Укажите образование"/>
+            </div>
+            <div class="form-text">Диапазон вводимых символов от 5 до 50 знаков</div>
+        </div>
+        </div>
+    }
+}

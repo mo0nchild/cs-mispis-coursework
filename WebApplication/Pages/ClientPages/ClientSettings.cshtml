@@ -1,0 +1,142 @@
+﻿@page "/client/settings"
+@model WebApplication.Pages.ClientPages.ClientSettingsModel
+@{
+    this.ViewData["Title"] = "Настройка профиля";
+    var banksList = new SelectList(new string[] { "Сбербанк", "Тинькофф Банк", "Совкомбанк", "ВТБ банк", "Газпромбанк" });
+}
+@section Supports { @{ await this.Html.RenderPartialAsync("ClientTabsPartial"); } }
+
+<div class="container p-0 my-5">
+    <div class="row justify-content-center">
+        @if(this.Model.ErrorMessage != null)
+        {
+        <div class="mb-4 alert alert-danger alert-dismissible fade show" role="alert" style="border-radius:16px;">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <strong>Уведомление!</strong>&nbsp;@this.Model.ErrorMessage
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        }
+        <div class="col-12 col-sm-10 shadow border border-secondary p-5 mb-4" style="border-radius:16px;">
+
+            <label class="form-label mb-4 fs-4 fw-semibold"><i class="bi bi-person-check"></i>&nbsp; Настройка профиля: </label>
+            <form asp-page="ClientSettings" method="post">
+                @await this.Html.PartialAsync("AccountFormPartial", this.Model.ClientModel.Account)
+                <div class="row mb-3">
+                    <label class="form-label">Email почта:</label>
+                    <div class="input-group has-validation">
+                        <span class="input-group-text"><i class="bi bi-at"></i></span>
+                        <input class="form-control" type="text" asp-for="@this.Model.ClientModel.Emailaddress" 
+                            maxlength="50" placeholder="Пример: test@gmail.com"/>
+                    </div>
+                    <div class="form-text">Диапазон вводимых символов от 10 до 50 знаков</div>
+                </div>
+                <input type="hidden" asp-for="@this.Model.ClientModel.Accountid"/>
+                @await this.Html.PartialAsync("SubmitModalPartial")
+            </form>
+        </div>
+        <div class="col-12 col-sm-10 shadow border border-secondary p-5" style="border-radius:16px;">
+            <div class="row justify-content-between mb-3">
+                <div class="col-12 col-sm-6 col-md-4">
+                    <label class="form-label fs-5 fw-semibold"> Платежные реквизиты: </label>
+                </div>
+               <div class="col-12 col-sm-6 col-md-4">
+                   <button type="button" class="btn w-100 btn-secondary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+                       Добавить новые реквизиты
+                   </button>
+                </div>
+            </div>
+            <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+                <div class="modal-dialog modal-dialog-centered modal-lg">
+                    <form class="modal-content" asp-page="ClientSettings" asp-page-handler="Payment" method="post">
+                        
+                        <div class="modal-header" style="background-color: var(--main-color);">
+                            <h1 class="modal-title fs-5" id="staticBackdropLabel">Добавление платежного реквизита</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            
+                                <div class="row mb-3">
+                                    <div class="col-12 col-sm-6">
+                                        <label class="form-label">Название банка:</label>
+                                        @this.Html.DropDownList("Bankprovider", banksList, new { @class="form-select" })
+                                    </div>
+                                    <div class="col-12 col-sm-6">
+                                        <label class="form-label">Срок действия:</label>
+                                        <input class="form-control" type="date" name="Endtime"/>
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-8">
+                                        <label class="form-label">Номер карты:</label>
+                                        <input class="form-control" type="text" name="Bankaccount" maxlength="19" placeholder="Пример: 4000-0012-3456-7899"/>
+                                        <div class="form-text">Количество вводимых символов 19 знаков</div>
+                                    </div>
+                                    <div class="col-4">
+                                        <label class="form-label">СVV Код:</label>
+                                        <input class="form-control" type="text" name="Cvv" maxlength="3" placeholder="Пример: 425"/>
+                                        <div class="form-text">Количество вводимых символов 3 знаков</div>
+                                    </div>
+                                </div>
+                        </div>
+                        <div class="modal-footer" style="background-color: var(--main-color);">
+                            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Отменить</button>
+                            <button type="submit" class="btn btn-secondary">Сохранить</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div style="overflow:scroll;max-height:200px;">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th> <th scope="col">Название банка:</th> <th scope="col">Срок действия:</th>
+                        <th scope="col">Номер карты:</th> <th scope="col"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (var index = 0; index < this.Model.ClientModel.Payments.Count; index++ )
+                    {
+                    var paymentRecord = this.Model.ClientModel.Payments.ElementAt(index);
+                    <tr>
+                        <th scope="row">@(index + 1)</th> <td>@paymentRecord.Bankprovider</td>
+                        <td>@paymentRecord.Endtime.ToString()</td> <td>@paymentRecord.Bankaccount</td>
+
+                        <td> @{await this.PaymentDelete(paymentRecord.Paymentid);} </td>
+                    </tr> 
+                    }
+                </tbody>
+            </table>
+            </div>
+            
+        </div>
+    </div>
+</div>
+@functions {
+    public async Task PaymentDelete(int paymentId)
+    {
+        <div class="w-100 d-inline-flex input-group" >
+            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#modal@(paymentId)">
+                Удалить
+            </button>
+
+            <div class="modal fade" id="modal@(paymentId)" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="modalLabel@(paymentId)">Удаление реквизита</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            Вы уверены, что хотите удалить выбранный метод оплаты?
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Отмена</button>
+                            <a asp-page="ClientSettings" asp-page-handler="PaymentRemove" asp-route-paymentId="@paymentId"
+                                class="btn btn-secondary">Подтвердить</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+}

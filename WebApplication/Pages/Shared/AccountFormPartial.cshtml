@@ -1,0 +1,39 @@
+﻿@model Models.Account
+@{ }
+<div class="row mb-3">
+    <div class="col-12 col-sm-4">
+        <label class="form-label">Фамилия:</label>
+        <input class="form-control" type="text" asp-for="Surname" maxlength="50" placeholder="Укажите вашу фамилию"/>
+    </div>
+    <div class="col-12 col-sm-4">
+        <label class="form-label">Имя:</label>
+        <input class="form-control" type="text" asp-for="Name" maxlength="50" placeholder="Укажите ваше имя"/>
+    </div>
+    <div class="col-12 col-sm-4">
+        <label class="form-label">Отчество:</label>
+        <input class="form-control" type="text" asp-for="Patronymic" maxlength="50" placeholder="(Необязательно)"/>
+    </div>
+    <div class="form-text">Диапазон вводимых символов от 5 до 50 знаков</div>
+</div>
+<div class="row mb-3">
+    <div class="col-12 col-sm-4">
+        <label class="form-label">Адрес проживания:</label>
+        <div class="input-group has-validation">
+            <span class="input-group-text"><i class="bi bi-mailbox2"></i></span>
+            <input class="form-control" type="text" asp-for="Address" maxlength="50" placeholder="Ваше местожительство"/>
+        </div>
+        <div class="form-text">Диапазон вводимых символов от 5 до 50 знаков</div>
+    </div>
+    <div class="col-12 col-sm-4">
+        <label class="form-label">Телефон:</label>
+        <div class="input-group has-validation">
+            <span class="input-group-text"><i class="bi bi-telephone-forward"></i></span>
+            <input class="form-control" type="text" asp-for="Phonenumber" maxlength="12" placeholder="Пример: +79009009090"/>
+        </div>
+        <div class="form-text">Количество вводимых символов 12 знаков</div>
+    </div>
+    <div class="col-12 col-sm-4">
+        <label class="form-label">День рождения:</label>
+        <input class="form-control" type="date" asp-for="Birthday"/>
+    </div> 
+</div>

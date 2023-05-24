@@ -1,0 +1,24 @@
+﻿@model Models.Employee
+@{
+    var gendersList = new SelectList(new string[] { "Мужчина", "Женщина", "Не указывать" });
+}
+<div class="row mb-3">
+    <div class="col-12 col-sm-6">
+        <label class="form-label">Паспорт:</label>
+        <input class="form-control" type="text" asp-for="Passport" maxlength="11" placeholder="Пример: 0000-000000"/>
+    </div>
+    <div class="col-12 col-sm-6">
+        <label class="form-label">Пол:</label>
+        <div class="input-group has-validation">
+            <span class="input-group-text"><i class="bi bi-universal-access-circle"></i></span>
+            @this.Html.DropDownListFor(item => item.Gender, gendersList, new {@class="form-select"})
+        </div>
+    </div>
+</div>
+<div class="row mb-3">
+    <div class="col-12">
+        <label class="form-label">Образование:</label>
+        <input class="form-control" type="text" asp-for="Education" maxlength="50" placeholder="Укажите образование"/>
+    </div>
+    <div class="form-text">Диапазон вводимых символов от 5 до 50 знаков</div>
+</div>

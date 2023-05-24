@@ -1,0 +1,45 @@
+html {
+    font-size: 14px;
+}
+
+@media (min-width: 768px) {
+    html {
+        font-size: 16px;
+    }
+}
+
+html {
+    position: relative;
+    min-height: 100%;
+}
+
+body {
+    --main-color: #ffef73;
+    --secondary-color: #ffda61;
+    --main-text-color: #EA2B1F;
+    height: 100vh;
+    width: 100vw;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+#page-footer {
+    margin-top: auto;
+    box-shadow: 0px 0px 10px #AAA;
+    background-color: var(--main-color);
+}
+
+::-webkit-scrollbar {
+    width: .45rem;
+    height: .45rem;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: #888;
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}

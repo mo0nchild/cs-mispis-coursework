@@ -157,7 +157,7 @@
                                 </div>
                                 <div class="col-12 col-sm-6">
                                     <input type="hidden" value="@this.Model.SelectedOrderId" name="selectedId" />
-                                    <input class="btn btn-secondary" type="submit" value="Получить заказ"/>
+                                    <input class="btn btn-secondary" @(this.Model.ClientModel.Payments.Count <= 0 ? "disabled" : "") type="submit" value="Получить заказ"/>
                                 </div>
                             </form>
                         </div>

@@ -18,7 +18,6 @@ namespace WebApplication.Pages.ManagerPages
         public int SelectedId { get; set; } = default!;
 
         public List<Builder> BuildersList { get; private set; } = default!;
-        public int CurrentBuilder { get; set; } = default;
         public Order SelectedOrder { get; private set; } = default!;
 
         public virtual async Task<IActionResult> OnGetAsync()

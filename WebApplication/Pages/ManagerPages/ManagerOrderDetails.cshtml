@@ -96,7 +96,7 @@
                         <select name="selectedBuilder" class="form-select" @(checker ? "disabled" : "")>
                             @foreach(var item in this.Model.BuildersList)
                             {
-                            <option value="@item.Builderid" selected="@(item.Builderid == )">
+                            <option value="@item.Builderid">
                                 @($"{item.Employee.Account.Surname} {item.Employee.Account.Name} / {item.Employee.Passport} / {item.Employee.Education}")
                             </option> 
                             }

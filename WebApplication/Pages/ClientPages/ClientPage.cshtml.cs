@@ -93,9 +93,20 @@ namespace WebApplication.Pages
             }
             using (var fileWriter = new StreamWriter("./payment.txt"))
             {
-                await fileWriter.WriteLineAsync("hello");
+                await fileWriter.WriteLineAsync($"Размеры:\t\t{myOrder.Width}|{myOrder.Height}");
+                await fileWriter.WriteLineAsync($"Тип окна:\t\t{myOrder.Windowtype}");
+                await fileWriter.WriteLineAsync($"Дата оформления заказа:\t\t{myOrder.Ordertime}");
+                await fileWriter.WriteLineAsync($"Состояние заказа:\t\t{myOrder.State}");
+                await fileWriter.WriteLineAsync($"Количество пакетов:\t\t{myOrder.Packetcount}");
+
+                await fileWriter.WriteLineAsync($"-----------------------------------------------------------");
+
+                await fileWriter.WriteLineAsync($"Название банка:\t\t{myPayment.Bankprovider}");
+                await fileWriter.WriteLineAsync($"Номер карты:\t\t{myPayment.Bankaccount}");
+                await fileWriter.WriteLineAsync($"Защитный код:\t\t{myPayment.Cvv}");
+                await fileWriter.WriteLineAsync($"Срок действия:\t\t{myPayment.Endtime}");
             }
-            return base.File(System.IO.File.ReadAllBytes("./payment.txt"), "application/octet-stream", "payment.txt");
+            return base.File(System.IO.File.ReadAllBytes("./payment.txt"), "application/octet-stream", "ЧЕК.txt");
         }
     }
 }

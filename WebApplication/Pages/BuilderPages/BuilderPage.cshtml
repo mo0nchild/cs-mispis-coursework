@@ -1,4 +1,347 @@
 ﻿@page "/builder"
 @model WebApplication.Pages.BuilderPageModel
 @{
+    this.ViewData["Title"] = "Рабочий стол";
+    var resourceTypes = new SelectList(new string[] { "Стекло", "Дерево", "Пластик", "Железо" });
+}
+@section Supports { @{ await this.Html.RenderPartialAsync("BuilderTabsPartial"); } }
+<div class="container p-0 my-5">
+    <div class="row justify-content-center">
+        @if(this.Model.ErrorMessage != null)
+        {
+        <div class="mb-4 alert alert-danger alert-dismissible fade show" role="alert" style="border-radius:16px;">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <strong>Уведомление!</strong>&nbsp;@this.Model.ErrorMessage
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        }
+        <div class="col-12 col-sm-10 shadow border border-secondary p-5 mb-4" style="border-radius:16px;">
+            <label class="form-label mb-3 fs-4 fw-semibold"><i class="bi bi-archive"></i>&nbsp;Список заказов для сборки: </label>
+            <div class="mb-3" style="overflow:scroll;max-height:300px;">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th> <th scope="col">Размеры:</th> <th scope="col">Тип окна:</th>
+                        <th scope="col">Толщина:</th> <th scope="col">Состояние:</th> <th scope="col">Дата заказа:</th>
+                        <th width="30" scope="col"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (var index = 0; index < this.Model.BuildingOrderList.Count; index++ )
+                    {
+                    var orderRecord = this.Model.BuildingOrderList.ElementAt(index);
+                    <tr>
+                        <th scope="row">@(index + 1)</th> 
+                        <td>@($"{orderRecord.Order.Width} / {orderRecord.Order.Height} (СМ)")</td>
+                        <td>@orderRecord.Order.Windowtype</td> 
+                        <td>@($"Кол-во пакетов: {orderRecord.Order.Packetcount} (ШТ)")</td>
+                        <td>@orderRecord.Order.State</td> 
+                        <td>@orderRecord.Order.Ordertime</td>
+                        <td>
+                            <a class="btn btn-secondary w-100" asp-page="BuilderPage" asp-route-SelectedOrderId="@orderRecord.Orderid">
+                                <i class="bi bi-bookmark-check"></i>
+                            </a>
+                        </td>
+                    </tr> 
+                    }
+                </tbody>
+            </table>
+            @if(this.Model.BuildingOrderList.Count <= 0)
+            {
+            <div class="d-flex flex-row justify-content-center">
+                <label class="form-label fs-5 fw-semibold">Список пока пустой</label>
+            </div>
+            }
+            </div>
+            <label class="form-label mb-3 fs-5 text-decoration-underline fw-semibold">
+                <i class="bi bi-archive"></i>&nbsp;Список ресурсов на складе: 
+            </label>
+            <div class="row mb-1">
+                <div class="col-12 col-md-8 px-3">
+                    <div class="mb-3" style="overflow:scroll;max-height:300px;">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th scope="col">#</th> 
+                                <th scope="col">Название ресурса:</th> 
+                                <th scope="col">Поставщик:</th> 
+                                <th scope="col">Кол-во:</th>
+                                <th scope="col">Цена (руб/шт):</th>
+                                <th width="30" scope="col"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (var index = 0; index < this.Model.ResourcesList.Count; index++ )
+                            {
+                            var resourceRecord = this.Model.ResourcesList.ElementAt(index);
+                            <tr>
+                                <th scope="row">@(index + 1)</th> 
+                                <td>@resourceRecord.Resourcename</td>
+                                <td>@resourceRecord.Provider.Companyname</td>
+                                <td>@resourceRecord.Count (шт)</td>
+                                <td>@resourceRecord.Priceforone (руб/шт)</td>
+                                <td>
+                                    <a class="btn btn-secondary w-100" asp-page="BuilderPage" 
+                                        asp-route-SelectedResourceId="@resourceRecord.Resourceid"><i class="bi bi-bookmark-check"></i>
+                                    </a>
+                                </td>
+                            </tr> 
+                            }
+                        </tbody>
+                    </table>
+                    @if(this.Model.ResourcesList.Count <= 0)
+                    {
+                    <div class="d-flex flex-row justify-content-center">
+                        <label class="form-label fs-5 fw-semibold">Список пока пустой</label>
+                    </div>
+                    }
+                    </div>
+                </div>
+                <div class="col-12 col-md-4 px-3">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th scope="col">#</th> 
+                                <th scope="col">Ресурс:</th> 
+                                <th scope="col">Кол-во:</th> 
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{ var resourceGroup = this.Model.ResourcesList.GroupBy(item => item.Resourcename); }
+                            @for (var index = 0; index < resourceGroup.Count(); index++ )
+                            {
+                            var group = resourceGroup.ElementAt(index);
+
+                            <tr>
+                                <th scope="row">@(index + 1)</th> 
+                                <td>@group.Key</td>
+                                <td>@group.Sum(item => item.Count)</td>
+                            </tr> 
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <label class="form-label mb-3 fs-5 text-decoration-underline fw-semibold">
+                <i class="bi bi-archive"></i>&nbsp;Список заявок на поставку ресурсов: 
+            </label>
+            <div class="row mb-3">
+                <div class="col-12 col-sm-6">
+                    <div class="mb-3" style="overflow:scroll;max-height:200px;">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr> <th scope="col">#</th> <th scope="col">Название ресурса:</th> <th scope="col">Кол-во:</th></tr>
+                        </thead>
+                        <tbody>
+                            @for (var index = 0; index < this.Model.ResourceOrderList.Count; index++ )
+                            {
+                            var resourceRecord = this.Model.ResourceOrderList.ElementAt(index);
+                            <tr>
+                                <th scope="row">@(index + 1)</th> <td>@resourceRecord.Resourcename</td>
+                                <td>@resourceRecord.Count</td>
+                            </tr> 
+                            }
+                        </tbody>
+                    </table>
+                    @if(this.Model.ResourceOrderList.Count <= 0)
+                    {
+                    <div class="d-flex flex-row justify-content-center">
+                        <label class="form-label fs-5 fw-semibold">Список пока пустой</label>
+                    </div>
+                    }
+                    </div>
+                </div>
+                <div class="col-12 col-sm-6">
+                    <form class="card card-body" asp-page="BuilderPage" asp-page-handler="Request">
+                        <div class="row mb-3">
+                            <div class="col-12 col-sm-6">
+                                <label class="form-label">Тип ресурса: </label>
+                                @this.Html.DropDownList("requireResource", resourceTypes, new { @class="form-select" })
+                            </div>
+                            <div class="col-12 col-sm-6">
+                                <label class="form-label">Необходимое кол-во: </label>
+                                <div class="input-group">
+                                    <input min="5" max="100" name="requireCount" value="50" type="number" class="form-control"/>
+                                    <span class="input-group-text">(Шт)</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12"> <input class="btn btn-secondary w-100" type="submit" value="Добавить заявку" /> </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@if(this.Model.SelectedOrderId != null)
+{
+<div class="modal show" id="myModal" data-bs-backdrop="static" role="dialog">
+    <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header" style="background-color: var(--main-color);">
+                <h1 class="modal-title fs-5">Просмотр заказа #@this.Model.SelectedOrderId</h1>
+                <a class="btn-close" asp-page="BuilderPage"></a>
+            </div>
+            <div class="modal-body" style="max-height:300px;">
+                <div class="row mb-3">
+                    <div class="col-6 col-sm-4">
+                        <label class="form-label">Тип окна:</label>
+                        <input type="text" class="form-control" readonly value="@this.Model.SelectedOrderModel?.Order.Windowtype" />
+                    </div>
+                    <div class="col-6 col-sm-4">
+                        <label class="form-label">Состояние заказа:</label>
+                        <input type="text" class="form-control" readonly value="@this.Model.SelectedOrderModel?.Order.State" />
+                    </div>
+                    <div class="col-6 col-sm-4">
+                        <label class="form-label">Дата создания:</label>
+                        <input type="text" class="form-control" readonly value="@this.Model.SelectedOrderModel?.Order.Ordertime" />
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-12 col-sm-4">
+                        <label class="form-label">Толщина окна:</label>
+                        <div class="input-group mb-3">
+                            <span class="input-group-text">Кол-во пакетов:</span>
+                            <input type="text" readonly class="form-control" value="@this.Model.SelectedOrderModel?.Order.Packetcount (Шт)"/>
+                        </div>
+                    </div>
+                    <div class="col-6 col-sm-4">
+                        <label class="form-label">Ширина окна:</label>
+                        <input type="text" readonly class="form-control" value="@this.Model.SelectedOrderModel?.Order.Height (См)"/>
+                    </div>
+                    <div class="col-6 col-sm-4">
+                        <label class="form-label">Длина окна:</label>
+                        <input type="text" readonly class="form-control" value="@this.Model.SelectedOrderModel?.Order.Width (См)"/>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-12 col-sm-6">
+                        <label class="form-label mb-3 fs-6 text-decoration-underline fw-semibold">
+                            Требуемые ресурсы: 
+                        </label>
+                    </div>
+                    <div class="col-12 col-sm-6">
+                        <label class="form-label mb-3 fs-6 text-decoration-underline fw-semibold">
+                            Доступные ресурсы: 
+                        </label>
+                    </div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-12 col-sm-6">
+                        <div class="input-group mb-3">
+                            <span class="input-group-text">@this.Model.ResourceRequireModel?.ResourceType:</span>
+                            <input type="text" readonly class="form-control" value="@this.Model.ResourceRequireModel?.RequiredResource (Шт)"/>
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-6">
+                        <div class="input-group mb-3">
+                            <span class="input-group-text">@this.Model.ResourceRequireModel?.ResourceType:</span>
+                            <input type="text" readonly class="form-control" value="@this.Model.ResourceRequireModel?.CountResource (Шт)"/>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-12 col-sm-6">
+                        <div class="input-group mb-3">
+                            <span class="input-group-text">Стекло:</span>
+                            <input type="text" readonly class="form-control" value="@this.Model.ResourceRequireModel?.RequiredGlass (Шт)"/>
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-6">
+                        <div class="input-group mb-3">
+                            <span class="input-group-text">Стекло:</span>
+                            <input type="text" readonly class="form-control" value="@this.Model.ResourceRequireModel?.CountGlass (Шт)"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer" style="background-color: var(--main-color);">
+                <form asp-page="BuilderPage" method="post">
+                    <input type="hidden" name="selectedId" value="@this.Model.SelectedOrderId"/>
+                    <input class="btn btn-secondary" type="submit" value="Собрать заказ"/>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+<script type="text/javascript">
+    $(window).on('load', () => $('#myModal').modal('show'));
+</script>
+}
+}
+else if(this.Model.SelectedResourceId != null)
+{
+<div class="modal show" id="myModal" data-bs-backdrop="static" role="dialog">
+    <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header" style="background-color: var(--main-color);">
+                <h1 class="modal-title fs-5">Просмотр ресурса #@this.Model.SelectedResourceId</h1>
+                <a class="btn-close" asp-page="BuilderPage"></a>
+            </div>
+            <div class="modal-body" style="max-height:300px;">
+                <label class="form-label mb-1 fs-5 text-decoration-underline fw-semibold">
+                    Информация о ресурсе: 
+                </label>
+                <div class="row mb-3">
+                    <div class="col-6 col-sm-4">
+                        <label class="form-label">Название ресурса:</label>
+                        <input type="text" class="form-control" readonly value="@this.Model.SelectedResourceModel?.Resourcename" />
+                    </div>
+                    <div class="col-6 col-sm-4">
+                        <label class="form-label">Количество:</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" readonly value="@this.Model.SelectedResourceModel?.Count" />
+                            <span class="input-group-text">(Шт)</span>
+                        </div>
+                    </div>
+                    <div class="col-6 col-sm-4">
+                        <label class="form-label">Цена:</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" readonly value="@this.Model.SelectedResourceModel?.Priceforone" />
+                            <span class="input-group-text">(Руб / Шт)</span>
+                        </div>
+                    </div>
+                </div>
+                @{ var providerModel = this.Model.SelectedResourceModel?.Provider; }
+                <label class="form-label mb-1 fs-5 text-decoration-underline fw-semibold">
+                    Информация о поставщике: 
+                </label>
+                <div class="row mb-3">
+                    <div class="col-6 col-sm-6">
+                        <label class="form-label">Фамилия:</label>
+                        <input type="text" readonly class="form-control" value="@providerModel?.Account.Surname"/>
+                    </div>
+                    <div class="col-6 col-sm-6">
+                        <label class="form-label">Имя:</label>
+                        <input type="text" readonly class="form-control" value="@providerModel?.Account.Name"/>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-6 col-sm-4">
+                        <label class="form-label">Название компании:</label>
+                        <input type="text" readonly class="form-control" value="@providerModel?.Companyname"/>
+                    </div>
+                    <div class="col-6 col-sm-4">
+                        <label class="form-label">Адрес компании:</label>
+                        <input type="text" readonly class="form-control" value="@providerModel?.Address"/>
+                    </div>
+                    <div class="col-6 col-sm-4">
+                        <label class="form-label">Телефон:</label>
+                        <input type="text" readonly class="form-control" value="@providerModel?.Account.Phonenumber"/>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer" style="background-color: var(--main-color);">&nbsp;</div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+<script type="text/javascript">
+    $(window).on('load', () => $('#myModal').modal('show'));
+</script>
+}
+}
 }

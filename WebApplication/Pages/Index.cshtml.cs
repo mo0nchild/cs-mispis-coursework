@@ -46,6 +46,9 @@ namespace WebApplication.Pages
         [BindPropertyAttribute]
         public Resourceprovider ProviderModel { get; set; } = default!;
 
+        [BindPropertyAttribute(SupportsGet = true, Name = "isActivated")]
+        public bool? IsAccountActivated { get; set; } = default!;
+
         public IndexModel(ILogger<IndexModel> logger, IDbContextFactory<MispisCourseworkContext> factory) : base() 
         { this._logger = logger; this.DatabaseFactory = factory; }
 
@@ -83,7 +86,7 @@ namespace WebApplication.Pages
                 switch (this.IndexMode)
                 {
                     case IndexMode.Builder:
-                        await dbcontext.Builders.AddAsync(new Builder() { Employeeid = this.EmployeeModel.Employeeid }); break;
+                        await dbcontext.Builders.AddAsync(new Builder() { Employee = this.EmployeeModel }); break;
                     case IndexMode.Client:
                         this.ClientModel.Accountid = this.AccountModel.Accountid;
                         await dbcontext.Clients.AddAsync(this.ClientModel); 
@@ -115,6 +118,9 @@ namespace WebApplication.Pages
                 { return this.RedirectToPage("Index", new { ErrorMessage = "Профиль не найден", IndexMode = this.IndexMode }); }
 
                 this.AccountModel = profileRecord.Account;
+                var employeeRecord = await dbcontext.Employees.FirstOrDefaultAsync(item => item.Accountid == this.AccountModel.Accountid);
+
+                if (employeeRecord != null && employeeRecord.Activated == false) return base.RedirectToPage("Index", new { isActivated = false });
             }
             var profilePrinciple = new ClaimsIdentity(new List<Claim>()
             {

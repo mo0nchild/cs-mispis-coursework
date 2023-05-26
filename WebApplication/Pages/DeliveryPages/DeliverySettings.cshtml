@@ -1,0 +1,39 @@
+﻿@page "/delivery/settings"
+@model WebApplication.Pages.DeliveryPages.DeliverySettingsModel
+@{
+    this.ViewData["Title"] = "Просмотр заказов";
+    var transportsList = new SelectList(new string[] { "Легковая машина", "Грузовая машина", "Велосипед", "Мотоцикл", "Самокат" });
+}
+@section Supports { @{ await this.Html.RenderPartialAsync("DeliveryTabsPartial"); } }
+<div class="container p-0 my-5">
+    <div class="row justify-content-center">
+        @if(this.Model.ErrorMessage != null)
+        {
+        <div class="mb-4 alert alert-danger alert-dismissible fade show" role="alert" style="border-radius:16px;">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <strong>Уведомление!</strong>&nbsp;@this.Model.ErrorMessage
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        }
+        <div class="col-12 col-sm-10 shadow border border-secondary p-5 mb-4" style="border-radius:16px;">
+
+            <label class="form-label mb-4 fs-4 fw-semibold"><i class="bi bi-person-check"></i>&nbsp; Настройка профиля: </label>
+            <form asp-page="DeliverySettings" method="post">
+                <input type="hidden" name="Accountid" value="@this.Model.Employee.Accountid"/>
+                @await this.Html.PartialAsync("AccountFormPartial", this.Model.Account)
+                @await this.Html.PartialAsync("EmployeeFormPartial", this.Model.Employee)
+                <div class="row mb-4">
+                    <div class="col-12 col-sm-6">
+                        <label class="form-label">Водительская лицензия:</label>
+                        <input class="form-control" type="text" asp-for="DeliveryModel.Driverlicence" maxlength="50" placeholder="Введите данные лицензии"/>
+                    </div>
+                    <div class="col-12 col-sm-6">
+                        <label class="form-label">Тип транспорта:</label>
+                        @this.Html.DropDownListFor(item => item.DeliveryModel.Transporttype, transportsList, new {@class="form-select"})
+                    </div>
+                </div>
+                @await this.Html.PartialAsync("SubmitModalPartial")
+            </form>
+        </div>
+    </div>
+</div>

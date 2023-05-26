@@ -9,13 +9,13 @@ public partial class Builder
 
     public int Employeeid { get; set; }
 
-    public int Managerid { get; set; }
+    public int? Managerid { get; set; }
 
-    public virtual Buildingorder? Buildingorder { get; set; }
+    public virtual ICollection<Buildingorder> Buildingorders { get; set; } = new List<Buildingorder>();
 
     public virtual Employee Employee { get; set; } = null!;
 
-    public virtual Manager Manager { get; set; } = null!;
+    public virtual Manager? Manager { get; set; }
 
     public virtual ICollection<Resourceorder> Resourceorders { get; set; } = new List<Resourceorder>();
 }

@@ -124,7 +124,6 @@ public partial class MispisCourseworkContext : DbContext
 
             entity.HasOne(d => d.Manager).WithMany(p => p.Builders)
                 .HasForeignKey(d => d.Managerid)
-                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("builders_managerid_fkey");
         });
 
@@ -134,15 +133,13 @@ public partial class MispisCourseworkContext : DbContext
 
             entity.ToTable("buildingorders");
 
-            entity.Property(e => e.Buildingid)
-                .ValueGeneratedOnAdd()
-                .HasColumnName("buildingid");
+            entity.Property(e => e.Buildingid).HasColumnName("buildingid");
             entity.Property(e => e.Builderid).HasColumnName("builderid");
             entity.Property(e => e.Orderid).HasColumnName("orderid");
 
-            entity.HasOne(d => d.Building).WithOne(p => p.Buildingorder)
-                .HasForeignKey<Buildingorder>(d => d.Buildingid)
-                .HasConstraintName("buildingorders_buildingid_fkey");
+            entity.HasOne(d => d.Builder).WithMany(p => p.Buildingorders)
+                .HasForeignKey(d => d.Builderid)
+                .HasConstraintName("buildingorders_builders_builderid_fk");
 
             entity.HasOne(d => d.Order).WithMany(p => p.Buildingorders)
                 .HasForeignKey(d => d.Orderid)

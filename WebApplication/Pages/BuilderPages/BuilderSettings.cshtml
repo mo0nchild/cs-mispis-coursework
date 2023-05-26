@@ -1,9 +1,9 @@
-﻿@page "/manager/settings"
-@model WebApplication.Pages.ManagerPages.ManagerSettingsModel
+﻿@page "/builder/settings"
+@model WebApplication.Pages.BuilderPages.BuilderSettingsModel
 @{
     this.ViewData["Title"] = "Настройка профиля";
 }
-@section Supports { @{ await this.Html.RenderPartialAsync("ManagerTabsPartial"); } }
+@section Supports { @{ await this.Html.RenderPartialAsync("BuilderTabsPartial"); } }
 <div class="container p-0 my-5">
     <div class="row justify-content-center">
         @if(this.Model.ErrorMessage != null)
@@ -17,7 +17,7 @@
         <div class="col-12 col-sm-10 shadow border border-secondary p-5 mb-4" style="border-radius:16px;">
 
             <label class="form-label mb-3 fs-4 fw-semibold"><i class="bi bi-person-check"></i>&nbsp; Настройка профиля: </label>
-            <form asp-page="ManagerSettings" method="post">
+            <form asp-page="BuilderSettings" method="post">
                 @await this.Html.PartialAsync("AccountFormPartial", this.Model.EmployeeModel.Account)
                 @await this.Html.PartialAsync("EmployeeFormPartial", this.Model.EmployeeModel)
                 <input type="hidden" name="Accountid" value="@this.Model.EmployeeModel.Accountid"/>

@@ -18,8 +18,8 @@ namespace WebApplication.Pages.ClientPages
     {
         protected IDbContextFactory<MispisCourseworkContext> DatabaseFactory { get; set; } = default!;
 
-        protected readonly ILogger<ClientPage> Logger = default!;
-        public ClientSettingsModel(ILogger<ClientPage> logger, IDbContextFactory<MispisCourseworkContext> factory) 
+        protected readonly ILogger<ClientSettingsModel> Logger = default!;
+        public ClientSettingsModel(ILogger<ClientSettingsModel> logger, IDbContextFactory<MispisCourseworkContext> factory) 
             : base() { this.Logger = logger; this.DatabaseFactory = factory; }
 
         [BindPropertyAttribute]
@@ -41,8 +41,6 @@ namespace WebApplication.Pages.ClientPages
 
                 if (this.ClientModel == null) return base.BadRequest("Данные невозможно загрузить");
             }
-            await Console.Out.WriteLineAsync($"\nemial: {this.ClientModel.Emailaddress}");
-
             return this.Page();
         }
         public async virtual Task<IActionResult> OnPostAsync([FromServices] IProfileService profileService)

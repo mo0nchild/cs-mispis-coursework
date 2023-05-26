@@ -45,9 +45,27 @@
             isPasswordHide = !isPasswordHide;
         });
     });
+    $(window).on('load', () => $('#myModal').modal('show'));
 </script>
 }
 
+@if(this.Model.IsAccountActivated == false)
+{
+<div class="modal fade" id="myModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Разрешение допуска в систему</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Внимание! Ваша заявка еще рассматривается нашими сотрудниками, подождите немного времени.
+            </div>
+            <div class="modal-footer">&nbsp;</div>
+        </div>
+    </div>
+</div>
+}
 <div class="container p-0 my-5">
     <div class="row justify-content-center">
     @if(this.Model.HasError == true)

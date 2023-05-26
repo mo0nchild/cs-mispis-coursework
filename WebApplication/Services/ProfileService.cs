@@ -43,7 +43,10 @@ namespace WebApplication.Services
             var validatePassport = employee.Passport != null && Regex.IsMatch(employee.Passport, @"^[0-9]{4}-[0-9]{6}$");
             if (!validatePassport) return new IProfileService.ProfileError("Неверный паспорт");
 
-            if (employee.Education.Length < 5) return new IProfileService.ProfileError("Неверные данные об образовании");
+            if (employee.Education == null || employee.Education.Length < 5)
+            {
+                return new IProfileService.ProfileError("Неверные данные об образовании");
+            }
             using (var dbcontext = await this.DatabaseFactory.CreateDbContextAsync())
             {
                 await dbcontext.Employees.Where(item => item.Accountid == profileId).ExecuteUpdateAsync(item => 

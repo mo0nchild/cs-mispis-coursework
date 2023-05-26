@@ -1,4 +1,5 @@
 ﻿@page "/manager"
+@using WebApplication.Models
 @model WebApplication.Pages.ManagerPageModel
 @{
     this.ViewData["Title"] = "Просмотр заказов";
@@ -14,5 +15,57 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
         }
+        <div class="col-12 col-sm-10 shadow border border-secondary p-5 mb-4" style="border-radius:16px;">
+
+            <label class="form-label mb-3 fs-4 fw-semibold"><i class="bi bi-card-checklist"></i>&nbsp; Список клиентских заказов: </label>
+            @{ await this.RenderOrdersTable(this.Model.OrdersList); }
+
+            <label class="form-label mb-3 fs-4 fw-semibold"><i class="bi bi-archive"></i>&nbsp; Список обработанных заказов: </label>
+            @{ await this.RenderOrdersTable(this.Model.AcceptedOrdersList, 
+                @<a class="btn btn-danger" asp-page="ManagerPage" asp-route-selectedId="@item" asp-page-handler="Delete"><i class="bi bi-trash3"></i></a>
+            ); }
+        </div>
     </div>
 </div>
+@functions 
+{
+    public async Task RenderOrdersTable(List<Order> ordersList, Func<dynamic?, object>? handler = null)
+    {
+    <div class="row mb-3">
+        <div style="overflow:scroll;max-height:300px;">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th scope="col">#</th> <th scope="col">Размеры:</th> <th scope="col">Тип окна:</th>
+                    <th scope="col">Толщина:</th> <th scope="col">Состояние:</th> <th scope="col">Дата заказа:</th>
+                    <th width="30" scope="col"></th><th width="30" scope="col"></th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (var index = 0; index < ordersList.Count; index++ )
+                {
+                var orderRecord = ordersList.ElementAt(index);
+                <tr>
+                    <th scope="row">@(index + 1)</th> <td>@($"{orderRecord.Width} / {orderRecord.Height} (СМ)")</td>
+                    <td>@orderRecord.Windowtype</td> <td>@($"Кол-во пакетов: {orderRecord.Packetcount} (ШТ)")</td>
+                    <td>@orderRecord.State</td> <td>@orderRecord.Ordertime</td>
+                    <td>
+                        <a class="btn btn-secondary w-100" asp-page="ManagerOrderDetails" 
+                            asp-route-selectedId="@orderRecord.Orderid"><i class="bi bi-info-square"></i>
+                        </a>
+                    </td>
+                    <td>@handler?.Invoke(orderRecord.Orderid)</td>
+                </tr> 
+                }
+            </tbody>
+        </table>
+        @if(ordersList.Count <= 0)
+        {
+        <div class="d-flex flex-row justify-content-center">
+            <label class="form-label fs-5 fw-semibold">Список пока пустой</label>
+        </div>
+        }
+        </div>
+    </div>
+    }
+}

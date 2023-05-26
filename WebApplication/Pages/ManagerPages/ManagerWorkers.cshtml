@@ -1,4 +1,6 @@
 ﻿@page "/manager/workers"
+@using Microsoft.AspNetCore.Html;
+@using WebApplication.Models;
 @model WebApplication.Pages.ManagerPages.ManagerWorkersModel
 @{
     this.ViewData["Title"] = "Штат сотрудников";
@@ -15,5 +17,264 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
         }
+        <div class="col-12 col-sm-10 shadow border border-secondary p-5 mb-4" style="border-radius:16px;">
+
+            <label class="form-label mb-3 fs-4 fw-semibold"><i class="bi bi-card-checklist"></i>&nbsp;Список сборщиков предприятия:</label>
+            <div class="row mb-4">
+                <div class="col-12 col-md-6">
+                    <label class="form-label mb-4 fs-5 text-decoration-underline fw-semibold">Ожидают работы:</label>
+                    @{ await this.RenderBuildersTable(this.Model.NotActiveBuildersList,
+                        @<a class="btn btn-success w-100" asp-page="ManagerWorkers" asp-page-handler="AddBuilder" asp-route-builderId="@item">
+                            <i class="bi bi-person-fill-add"></i>
+                        </a>);
+                    }
+                </div>
+                <div class="col-12 col-md-6">
+                    <label class="form-label mb-4 fs-5 text-decoration-underline fw-semibold">Устроены в штате сборщиков:</label>
+                    @{ await this.RenderBuildersTable(this.Model.ActiveBuildersList,
+                        @<a class="btn btn-danger w-100" asp-page="ManagerWorkers" asp-page-handler="RemoveBuilder" asp-route-builderId="@item">
+                            <i class="bi bi-person-fill-dash"></i>
+                        </a>);
+                    }
+                </div>
+            </div>
+            <div class="row mb-3 justify-content-between">
+                <div class="col-12 col-md-6">
+                    <label class="form-label fs-4 fw-semibold"><i class="bi bi-card-checklist"></i>&nbsp;Список работников предприятия:</label>
+                </div>
+                <div class="col-12 col-md-4">
+                    <button class="btn btn-secondary w-100" type="button" data-bs-toggle="collapse" data-bs-target="#collapseList">
+                        Просмотр заявок на работу
+                    </button>
+                </div>
+            </div>
+            <div class="collapse card card-body row mb-3" id="collapseList">
+                @{ await this.RenderEmployeesTable(this.Model.RequestEmployeesList, 
+                @<a class="btn btn-success w-100" asp-page="ManagerWorkers" asp-page-handler="Edit" asp-route-employeeId="@item"
+                    asp-route-ModalWindowMode="@ModalWindowMode.AddEmployee"><i class="bi bi-person-fill-add"></i> 
+                </a>); 
+                }
+            </div>
+            <div class="row mb-3">
+                @{ await this.RenderEmployeesTable(this.Model.AllEmployeesList, 
+                @<a class="btn btn-danger w-100" asp-page="ManagerWorkers" asp-page-handler="Delete" asp-route-employeeId="@item"
+                    asp-route-ModalWindowMode="@ModalWindowMode.DeleteEmployee"><i class="bi bi-person-fill-dash"></i>
+                </a>); 
+                }
+            </div>
+        </div>
     </div>
 </div>
+@switch(this.Model.ModalWindowMode)
+{
+case ModalWindowMode.LookInfo:
+<div class="modal show" id="myModal" data-bs-backdrop="static" role="dialog">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header" style="background-color: var(--main-color);">
+                <h1 class="modal-title fs-5">Просмотр данных сотрудника #@this.Model.SelectedEmployee?.Employeeid</h1>
+                <a class="btn-close" asp-page="ManagerWorkers"></a>
+            </div>
+            <div class="modal-body">
+                <div class="row mb-3">
+                    <div class="col-6 col-sm-4">
+                        <label class="form-label">Фамилия:</label>
+                        <input type="text" class="form-control" readonly value="@this.Model.SelectedEmployee?.Account.Surname" />
+                    </div>
+                    <div class="col-6 col-sm-4">
+                        <label class="form-label">Имя:</label>
+                        <input type="text" class="form-control" readonly value="@this.Model.SelectedEmployee?.Account.Name" />
+                    </div>
+                    <div class="col-6 col-sm-4">
+                        <label class="form-label">Отчество:</label>
+                        <input type="text" class="form-control" readonly value="@(this.Model.SelectedEmployee?.Account.Patronymic ?? "Не указано")" />
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-12 col-sm-4">
+                        <label class="form-label">Адрес проживания:</label>
+                        <div class="input-group has-validation">
+                            <span class="input-group-text"><i class="bi bi-mailbox2"></i></span>
+                            <input class="form-control" type="text" readonly value="@this.Model.SelectedEmployee?.Account.Address" />
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-4">
+                        <label class="form-label">Телефон:</label>
+                        <div class="input-group has-validation">
+                            <span class="input-group-text"><i class="bi bi-telephone-forward"></i></span>
+                            <input class="form-control" type="text" readonly value="@this.Model.SelectedEmployee?.Account.Phonenumber" />
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-4">
+                        <label class="form-label">День рождения:</label>
+                        <input class="form-control" type="text" readonly value="@this.Model.SelectedEmployee?.Account.Birthday"/>
+                    </div> 
+                </div>
+                <div class="row mb-3">
+                    <div class="col-12 col-sm-6">
+                        <label class="form-label">Паспорт:</label>
+                        <input class="form-control" type="text" readonly value="@this.Model.SelectedEmployee?.Passport" />
+                    </div>
+                    <div class="col-12 col-sm-6">
+                        <label class="form-label">Пол:</label>
+                        <div class="input-group has-validation">
+                            <span class="input-group-text"><i class="bi bi-universal-access-circle"></i></span>
+                            <input class="form-control" type="text" readonly value="@this.Model.SelectedEmployee?.Gender" />
+                        </div>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-6">
+                        <label class="form-label">Образование:</label>
+                        <input class="form-control" type="text" readonly value="@this.Model.SelectedEmployee?.Education" />
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label">Должность:</label>
+                        <input class="form-control" type="text" readonly value="@this.Model.SelectedEmployee?.Account.Profiletype" />
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer" style="background-color: var(--main-color);">&nbsp;</div>
+        </div>
+    </div>
+</div>
+    break;
+case ModalWindowMode.AddEmployee:
+<div class="modal show" id="myModal" data-bs-backdrop="static" role="dialog">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <form class="modal-content" asp-page="ManagerWorkers" asp-page-handler="Edit" method="post">
+            <input type="hidden" name="employeeId" value="@this.Model.SelectedEmployee?.Employeeid"/>
+
+            <div class="modal-header" style="background-color: var(--main-color);">
+                <h1 class="modal-title fs-5">Оформление договора с новым сотрудником #@this.Model.SelectedEmployee?.Employeeid</h1>
+                <a class="btn-close" asp-page="ManagerWorkers"></a>
+            </div>
+            <div class="modal-body row mb-3">
+                <div class="col-12 col-sm-6">
+                    <label class="form-label">Оплата труда сотрудника:</label>
+                    <div class="input-group">
+                        <span class="input-group-text">Зарплата:</span>
+                        <input type="number" class="form-control" max="100000" min="1000" value="50000" name="salary"/>
+                        <span class="input-group-text">₽ [руб.]</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer" style="background-color: var(--main-color);">
+                <input type="submit" class="btn btn-success" value="Принять на работу"/>
+            </div>
+        </form>
+    </div>
+    </div>
+    break;
+case ModalWindowMode.DeleteEmployee:
+<div class="modal show" id="myModal" data-bs-backdrop="static" role="dialog" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <form class="modal-content" asp-page="ManagerWorkers" asp-page-handler="Delete" method="post">
+            <input type="hidden" name="employeeId" value="@this.Model.SelectedEmployee?.Employeeid"/>
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Удаление сотрудника из системы</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body"> Увольнение сотрудника #@this.Model.SelectedEmployee?.Employeeid. Вы точно уверены? </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Назад</button>
+                <input type="submit" value="Подтвердить" class="btn btn-secondary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+    break;
+}
+@if (this.Model.ModalWindowMode != ModalWindowMode.NoneWindow)
+{
+@section Scripts { <script type="text/javascript">$(window).on('load', () => $('#myModal').modal('show')); </script> }
+}
+@functions
+{
+    public async Task RenderBuildersTable(List<Builder> buildersList, Func<int, object> htmlString)
+    {
+        var tdStyle = "max-width:100px;overflow: hidden;text-overflow: ellipsis;white-space: nowrap";
+        <div style="overflow:scroll;max-height:300px;">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th scope="col">#</th> 
+                    <th scope="col">Фамилия Имя:</th> 
+                    <th scope="col">Образование:</th>
+                    <th scope="col">Пол:</th> 
+                    <th width="30" scope="col"></th> <th width="30" scope="col"></th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (var index = 0; index < buildersList.Count; index++ )
+                {
+                var builderRecord = buildersList.ElementAt(index).Employee;
+                <tr>
+                    <th scope="row">@(index + 1)</th> 
+                    <td style="@(tdStyle)">@($"{builderRecord.Account.Surname} {builderRecord.Account.Name}") </td>
+                    <td style="@(tdStyle)">@builderRecord.Education</td> 
+                    <td style="@(tdStyle)">@builderRecord.Gender</td> 
+                    <td class="p-1">
+                        <a class="btn btn-secondary w-100" asp-page="ManagerWorkers" asp-page-handler="Info"
+                            asp-route-selectedEmployeeId="@builderRecord.Employeeid"><i class="bi bi-eye-fill"></i>
+                        </a>
+                    </td>
+                    <td class="p-1"> @htmlString(buildersList.ElementAt(index).Builderid) </td>
+                </tr> 
+                }
+            </tbody>
+        </table>
+        @if(buildersList.Count <= 0)
+        {
+        <div class="d-flex flex-row justify-content-center">
+            <label class="form-label fs-5 fw-semibold">Список пока пустой</label>
+        </div>
+        }
+        </div>
+    }
+    public async Task RenderEmployeesTable(List<Employee> employeesList, Func<dynamic?, object> htmlString)
+    {
+        var tdStyle = "max-width:100px;overflow: hidden;text-overflow: ellipsis;white-space: nowrap";
+        <div style="overflow:scroll;max-height:400px;">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th scope="col">#</th> <th scope="col">Фамилия Имя:</th>
+                    <th scope="col">Образование:</th> 
+                    <th scope="col">Пол:</th>
+                    <th scope="col">Должность:</th>
+                    <th scope="col">День рождения:</th>
+                    <th scope="col"></th><th scope="col"></th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (var index = 0; index < employeesList.Count; index++ )
+                {
+                var employeeRecord = employeesList.ElementAt(index);
+                <tr>
+                    <th scope="row">@(index + 1)</th> 
+                    <td style="@tdStyle">@($"{employeeRecord.Account.Surname} {employeeRecord.Account.Name}") </td>
+                    <td style="@tdStyle">@(employeeRecord.Education)</td> 
+                    <td style="@tdStyle">@(employeeRecord.Gender)</td> 
+                    <td style="@tdStyle">@(employeeRecord.Account.Profiletype)</td> 
+                    <td style="@tdStyle">@(employeeRecord.Account.Birthday.ToString())</td> 
+                    <td class="p-1">
+                        <a class="btn btn-secondary w-100" asp-page="ManagerWorkers" asp-page-handler="Info"
+                            asp-route-selectedEmployeeId="@employeeRecord.Employeeid"><i class="bi bi-eye-fill"></i>
+                        </a>
+                    </td>
+                    <td class="p-1"> @(htmlString(employeeRecord.Employeeid)) </td>
+                </tr> 
+                }
+            </tbody>
+        </table>
+        @if(employeesList.Count <= 0)
+        {
+        <div class="d-flex flex-row justify-content-center">
+            <label class="form-label fs-5 fw-semibold">Список пока пустой</label>
+        </div>
+        }
+        </div>
+    }
+}

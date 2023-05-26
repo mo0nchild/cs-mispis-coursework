@@ -1,0 +1,122 @@
+﻿@page "/manager/orderdetail={SelectedId:int}"
+@model WebApplication.Pages.ManagerPages.ManagerOrderDetailsModel
+@{
+    this.ViewData["Title"] = "Просмотр заказов";
+}
+@section Supports { @{ await this.Html.RenderPartialAsync("ManagerTabsPartial"); } }
+<div class="container p-0 my-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-sm-8 shadow border border-secondary p-5 mb-4" style="border-radius:16px;">
+
+            <label class="fs-4 d-flex flex-row justify-content-between flex-nowrap mb-3 fw-semibold">
+                <div class="d-flex">
+                    <i class="bi bi-card-checklist"></i>
+                    &nbsp; Просмотр информации о заказе #@this.Model.SelectedOrder?.Orderid: 
+                </div>
+                <a class="btn btn-close fs-5" asp-page="ManagerPage"></a>
+            </label>
+            <div class="row mb-3">
+                <div class="col-6 col-sm-4">
+                    <label class="form-label">Тип окна:</label>
+                    <input type="text" class="form-control" readonly value="@this.Model.SelectedOrder?.Windowtype" />
+                </div>
+                <div class="col-6 col-sm-4">
+                    <label class="form-label">Состояние заказа:</label>
+                    <input type="text" class="form-control" readonly value="@this.Model.SelectedOrder?.State" />
+                </div>
+                <div class="col-6 col-sm-4">
+                    <label class="form-label">Дата создания:</label>
+                    <input type="text" class="form-control" readonly value="@this.Model.SelectedOrder?.Ordertime" />
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-12 col-sm-4">
+                    <label class="form-label">Толщина окна:</label>
+                    <div class="input-group mb-3">
+                        <span class="input-group-text">Кол-во пакетов:</span>
+                        <input type="text" readonly class="form-control" value="@this.Model.SelectedOrder?.Packetcount (ШТ)"/>
+                    </div>
+                </div>
+                <div class="col-6 col-sm-4">
+                    <label class="form-label">Ширина окна:</label>
+                    <input type="text" readonly class="form-control" value="@this.Model.SelectedOrder?.Height (СМ)"/>
+                </div>
+                <div class="col-6 col-sm-4">
+                    <label class="form-label">Длина окна:</label>
+                    <input type="text" readonly class="form-control" value="@this.Model.SelectedOrder?.Width (СМ)"/>
+                </div>
+            </div>
+            <label class="fs-5 mb-3 fw-semibold">
+                <i class="bi bi-person-circle"></i>&nbsp; Контактные данные заказчика: 
+            </label>
+            @{ var accountInfo = this.Model.SelectedOrder?.Client.Account; }
+            <div class="row mb-3">
+                <div class="col-12 col-sm-4">
+                    <label class="form-label">Фамилия:</label>
+                    <input class="form-control" type="text" readonly value="@accountInfo?.Surname"/>
+                </div>
+                <div class="col-12 col-sm-4">
+                    <label class="form-label">Имя:</label>
+                    <input class="form-control" type="text" readonly value="@accountInfo?.Name"/>
+                </div>
+                <div class="col-12 col-sm-4">
+                    <label class="form-label">Телефон:</label>
+                    <div class="input-group has-validation">
+                        <span class="input-group-text"><i class="bi bi-telephone-forward"></i></span>
+                        <input class="form-control" type="text" readonly value="@accountInfo?.Phonenumber"/>
+                    </div>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-12 col-sm-6">
+                    <label class="form-label">Адрес проживания:</label>
+                    <div class="input-group has-validation">
+                        <span class="input-group-text"><i class="bi bi-map"></i></span>
+                        <input class="form-control" type="text" readonly value="@accountInfo?.Address"/>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-6">
+                    <label class="form-label">Email:</label>
+                    <div class="input-group has-validation">
+                        <span class="input-group-text"><i class="bi bi-mailbox2"></i></span>
+                        <input class="form-control" type="text" readonly value="@this.Model.SelectedOrder?.Client.Emailaddress"/>
+                    </div>
+                </div>
+            </div>
+            <label class="fs-5 mb-1 fw-semibold">
+                <i class="bi bi-signpost-2"></i>&nbsp; Действия для обработки заказа: 
+            </label>
+            @if(this.Model.BuildersList.Count > 0)
+            {
+                <div class="row mb-3">
+                    <div class="col-12 col-sm-8 pt-3">
+                    <label class="form-label">Доступный сборщик штата:</label>
+                    <form class="input-group has-validation" asp-page="ManagerOrderDetails" method="post">
+                        @{ var checker = this.Model.SelectedOrder?.State != "Обрабатывается" && this.Model.SelectedOrder?.State != "Ожидание"; }
+                        <select name="selectedBuilder" class="form-select" @(checker ? "disabled" : "")>
+                            @foreach(var item in this.Model.BuildersList)
+                            {
+                            <option value="@item.Builderid" selected="@(item.Builderid == )">
+                                @($"{item.Employee.Account.Surname} {item.Employee.Account.Name} / {item.Employee.Passport} / {item.Employee.Education}")
+                            </option> 
+                            }
+                        </select>
+                        <input class="btn btn-secondary" type="submit" value="Обновить статус" @(checker ? "disabled" : "")/>
+                    </form>
+                </div>
+                <div class="col-12 col-sm-4 pt-3">
+                    <label class="form-label">&nbsp;</label>
+                    <a class="btn btn-danger w-100" type="button" asp-page="ManagerOrderDetails" asp-route-SelectedId="@this.Model.SelectedId"
+                        asp-page-handler="Refuse">Отказать</a>
+                </div>
+            </div>
+            }
+            else
+            {
+            <div class="mb-3 d-flex flex-row justify-content-center">
+                <label class="form-label fs-6 text-decoration-underline fw-semibold">Ни один сборщик не добавлен в штат</label>
+            </div>
+            }
+        </div>
+    </div>
+</div>

@@ -1,0 +1,37 @@
+﻿@page "/provider/settings"
+@model WebApplication.Pages.ProviderPages.ProviderSettingsModel
+@{
+    this.ViewData["Title"] = "Настройка профиля";
+}
+@section Supports { @{ await this.Html.RenderPartialAsync("ProviderTabsPartial"); } }
+<div class="container p-0 my-5">
+    <div class="row justify-content-center">
+        @if(this.Model.ErrorMessage != null)
+        {
+        <div class="mb-4 alert alert-danger alert-dismissible fade show" role="alert" style="border-radius:16px;">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <strong>Уведомление!</strong>&nbsp;@this.Model.ErrorMessage
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        }
+        <div class="col-12 col-sm-10 shadow border border-secondary p-5 mb-4" style="border-radius:16px;">
+
+            <label class="form-label mb-4 fs-4 fw-semibold"><i class="bi bi-person-check"></i>&nbsp; Настройка профиля: </label>
+            <form asp-page="ProviderSettings" method="post">
+                @await this.Html.PartialAsync("AccountFormPartial", this.Model.ProviderModel.Account)
+                <div class="row mb-4">
+                    <div class="col-12 col-sm-6">
+                        <label class="form-label">Название компании:</label>
+                        <input class="form-control" type="text" asp-for="ProviderModel.Companyname" maxlength="50" placeholder="Введите название"/>
+                    </div>
+                    <div class="col-12 col-sm-6">
+                        <label class="form-label">Адрес офиса:</label>
+                        <input class="form-control" type="text" asp-for="ProviderModel.Address" maxlength="50" placeholder="Введите адрес"/>
+                    </div>
+                </div>
+                <input type="hidden" name="Accountid" value="@this.Model.ProviderModel.Accountid"/>
+                @await this.Html.PartialAsync("SubmitModalPartial")
+            </form>
+        </div>
+    </div>
+</div>

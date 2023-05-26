@@ -70,7 +70,8 @@
                 <thead>
                     <tr>
                         <th scope="col">#</th> <th scope="col">Размеры:</th> <th scope="col">Тип окна:</th>
-                        <th scope="col">Толщина:</th> <th scope="col">Состояние:</th>
+                        <th scope="col">Толщина:</th> <th scope="col">Состояние:</th> <th scope="col">Дата заказа:</th>
+                        <th width="30" scope="col"></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -78,17 +79,142 @@
                     {
                     var orderRecord = this.Model.ClientModel.Orders.ElementAt(index);
                     <tr>
-                        <th scope="row">@(index + 1)</th> <td>@($"{orderRecord.Width} / {orderRecord.Height}")</td>
-                        <td>@orderRecord.Windowtype</td> <td>@($"Кол-во пакетов: {orderRecord.Packetcount}")</td>
-                        <td>@orderRecord.State</td>
+                        <th scope="row">@(index + 1)</th> <td>@($"{orderRecord.Width} / {orderRecord.Height} (СМ)")</td>
+                        <td>@orderRecord.Windowtype</td> <td>@($"Кол-во пакетов: {orderRecord.Packetcount} (ШТ)")</td>
+                        <td>@orderRecord.State</td> <td>@orderRecord.Ordertime</td>
+                        <td>
+                            <a class="btn btn-secondary w-100" asp-page="ClientPage" asp-route-SelectedOrderId="@orderRecord.Orderid">
+                                <i class="bi bi-bookmark-check"></i>
+                            </a>
+                        </td>
                     </tr> 
                     }
                 </tbody>
             </table>
+            @if(this.Model.ClientModel.Orders.Count <= 0)
+            {
+            <div class="d-flex flex-row justify-content-center">
+                <label class="form-label fs-5 fw-semibold">Список пока пустой</label>
             </div>
-
+            }
+            </div>
         </div>
-       
-
     </div>
 </div>
+@if(this.Model.SelectedOrderId != null)
+{
+<div class="modal show" id="myModal" data-bs-backdrop="static" role="dialog">
+    <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header" style="background-color: var(--main-color);">
+                <h1 class="modal-title fs-5">Просмотр заказа #@this.Model.SelectedOrderId</h1>
+                <a class="btn-close" asp-page="ClientPage"></a>
+            </div>
+            <div class="modal-body" style="max-height:300px;">
+                <div class="row mb-3">
+                    <div class="col-6 col-sm-4">
+                        <label class="form-label">Тип окна:</label>
+                        <input type="text" class="form-control" readonly value="@this.Model.OrderModel?.Windowtype" />
+                    </div>
+                    <div class="col-6 col-sm-4">
+                        <label class="form-label">Состояние заказа:</label>
+                        <input type="text" class="form-control" readonly value="@this.Model.OrderModel?.State" />
+                    </div>
+                    <div class="col-6 col-sm-4">
+                        <label class="form-label">Дата создания:</label>
+                        <input type="text" class="form-control" readonly value="@this.Model.OrderModel?.Ordertime" />
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-6 col-sm-4">
+                        <label class="form-label">Толщина окна:</label>
+                        <div class="input-group mb-3">
+                            <span class="input-group-text">Кол-во пакетов:</span>
+                            <input type="text" readonly class="form-control" value="@this.Model.OrderModel?.Packetcount (ШТ)"/>
+                        </div>
+                    </div>
+                    <div class="col-6 col-sm-4">
+                        <label class="form-label">Ширина окна:</label>
+                        <input type="text" readonly class="form-control" value="@this.Model.OrderModel?.Height (СМ)"/>
+                    </div>
+                    <div class="col-6 col-sm-4">
+                        <label class="form-label">Длина окна:</label>
+                        <input type="text" readonly class="form-control" value="@this.Model.OrderModel?.Width (СМ)"/>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="collapse mx-2 mb-3" id="collapsePayment">
+                        <div class="card card-body">
+                            <label class="form-label mb-3 fs-5 text-decoration-underline fw-semibold">Оплата заказа:</label>
+                            <form asp-page="ClientPage" asp-page-handler="Pay" method="post" class=row mb-3">
+                                <div class="col-12 col-sm-6">
+                                    <select class="form-select" name="paymentType">
+                                        @foreach(var item in this.Model.ClientModel.Payments)
+                                        {
+                                        <option value="@item.Paymentid">@item.Bankaccount / @item.Bankprovider</option> 
+                                        }
+                                    </select>
+                                </div>
+                                <div class="col-12 col-sm-6">
+                                    <input type="hidden" value="@this.Model.SelectedOrderId" name="selectedId" />
+                                    <input class="btn btn-secondary" type="submit" value="Получить заказ"/>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                @{ var managerAccount = this.Model.OrderModel?.Manager?.Employee; }
+                <div class="row">
+                    <div class="collapse mx-2 mb-3" id="collapseManager">
+                        <div class="card card-body">
+                            <label class="form-label mb-3 fs-5 text-decoration-underline fw-semibold">Данные менеджера:</label>
+                            <div class="row mb-3">
+                                <div class="col-12 col-sm-6">
+                                    <label class="form-label">Фамилия:</label>
+                                    <input type="text" readonly class="form-control" value="@managerAccount?.Account.Surname"/>
+                                </div>
+                                <div class="col-12 col-sm-6">
+                                    <label class="form-label">Имя:</label>
+                                    <input type="text" readonly class="form-control" value="@managerAccount?.Account.Name"/>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-12 col-sm-4">
+                                    <label class="form-label">Телефон:</label>
+                                    <input type="text" readonly class="form-control" value="@managerAccount?.Account.Phonenumber"/>
+                                </div>
+                                <div class="col-12 col-sm-4">
+                                    <label class="form-label">Образование:</label>
+                                    <input type="text" readonly class="form-control" value="@managerAccount?.Education"/>
+                                </div>
+                                <div class="col-12 col-sm-4">
+                                    <label class="form-label">Пол:</label>
+                                    <input type="text" readonly class="form-control" value="@managerAccount?.Gender"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer" style="background-color: var(--main-color);">
+                <button class="btn btn-secondary" @(this.Model.OrderModel?.Manager == null || managerAccount == null ? "disabled" : "") 
+                    data-bs-toggle="collapse" data-bs-target="#collapseManager" type="button" > Информация
+                </button>
+                <button class="btn btn-success" type="button" @(this.Model.OrderModel?.State != "Доставлен" ? "disabled" : "") 
+                    data-bs-toggle="collapse" data-bs-target="#collapsePayment"> Оплатить
+                </button>
+                @{ var checkDeleteDisabled = this.Model.OrderModel?.State == "Готов к отправке" || this.Model.OrderModel?.State == "Доставлен"; }
+                <form method="post" asp-page="ClientPage" asp-page-handler="Delete">
+                    <input type="hidden" name="orderId" value="@this.Model.OrderModel?.Orderid"/>
+                    <input type="submit" class="btn btn-danger" value="Удалить" @(checkDeleteDisabled ? "disabled" : "")/>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+<script type="text/javascript">
+    $(window).on('load', () => $('#myModal').modal('show'));
+</script>
+}
+}

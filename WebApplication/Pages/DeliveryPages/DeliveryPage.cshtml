@@ -1,4 +1,63 @@
 ﻿@page "/delivery"
 @model WebApplication.Pages.DeliveryPages.DeliveryPageModel
 @{
+    this.ViewData["Title"] = "Просмотр заказов";
 }
+@section Supports { @{ await this.Html.RenderPartialAsync("DeliveryTabsPartial"); } }
+<div class="container p-0 my-5">
+    <div class="row justify-content-center">
+        @if(this.Model.ErrorMessage != null)
+        {
+        <div class="mb-4 alert alert-danger alert-dismissible fade show" role="alert" style="border-radius:16px;">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <strong>Уведомление!</strong>&nbsp;@this.Model.ErrorMessage
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        }
+        <div class="col-12 col-sm-10 shadow border border-secondary p-5 mb-4" style="border-radius:16px;">
+
+            <label class="form-label mb-3 fs-4 fw-semibold"><i class="bi bi-archive"></i>&nbsp;Список доступных заказов: </label>
+            <div class="mb-2" style="overflow:scroll;max-height:300px;">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th> 
+                            <th scope="col">Размеры:</th> 
+                            <th scope="col">Тип окна:</th>
+                            <th scope="col">Толщина:</th> 
+                            <th scope="col">Состояние:</th> 
+                            <th scope="col">Дата заказа:</th>
+                            <th width="30" scope="col"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (var index = 0; index < this.Model.OrdersList.Count; index++ )
+                        {
+                        var orderRecord = this.Model.OrdersList.ElementAt(index);
+                        <tr>
+                            <th scope="row">@(index + 1)</th> 
+                            <td>@($"{orderRecord.Width} / {orderRecord.Height} (СМ)")</td>
+                            <td>@orderRecord.Windowtype</td> 
+                            <td>@($"Кол-во пакетов: {orderRecord.Packetcount} (ШТ)")</td>
+                            <td>@orderRecord.State</td> 
+                            <td>@orderRecord.Ordertime</td>
+                            <td>
+                                <form method="post" asp-page="DeliveryPage">
+                                    <input type="hidden" name="selectedId" value="@orderRecord.Orderid" />
+                                    <input type="submit" class="btn btn-success" value="Доставить"/>
+                                </form>
+                            </td>
+                        </tr> 
+                        }
+                    </tbody>
+                </table>
+                @if(this.Model.OrdersList.Count <= 0)
+                {
+                <div class="d-flex flex-row justify-content-center">
+                    <label class="form-label fs-5 fw-semibold">Список пока пустой</label>
+                </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

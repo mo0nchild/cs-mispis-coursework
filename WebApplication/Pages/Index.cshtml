@@ -94,7 +94,7 @@
             </div>
             <div class="input-group mb-2 has-validation">
                 <div class="form-floating flex-grow-1 @(this.Model.HasError ? "is-invalid" : "")">
-                    @this.Html.TextBox("AuthorizationModel.Password", "", new {@class=$"form-control {(this.Model.HasError ? "is-invalid" : "")}", 
+                    @this.Html.TextBox("AuthorizationModel.Password", "", new {id="password", @class=$"form-control {(this.Model.HasError ? "is-invalid" : "")}", 
                         type="password", placeholder="Пароль", maxlength="50"})
                     <label for="password">Пароль</label>
                 </div>
